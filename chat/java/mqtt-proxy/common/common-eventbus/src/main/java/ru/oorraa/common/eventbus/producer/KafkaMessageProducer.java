@@ -30,7 +30,7 @@ public class KafkaMessageProducer implements KafkaProducer {
         props.put("zookeeper.connect", "178.62.194.22:2181/kafka"); // "hostname1:port1/dir"
         props.put("serializer.class", MessageEncoder.class.getName());
         props.put("request.required.acks", "1");
-        props.put("producer.type", "async");
+        props.put("producer.type", "sync");
         props.put("client.id", "mqtt-proxy");
 
         log.trace("kafka producer config: {}", props);

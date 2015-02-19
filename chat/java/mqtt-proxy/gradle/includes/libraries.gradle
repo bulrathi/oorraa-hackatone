@@ -24,7 +24,7 @@ project.ext.libVer = [
         thrift            : '0.9.2',
         httpclient        : '4.3.2',
         aspectj           : '1.8.4',
-        kafka             : "0.8.1.1",
+        kafka             : "0.8.2.0",
         scala             : "2.10",
 
         // OORRAA libraries
