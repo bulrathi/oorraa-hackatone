@@ -5,6 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.context.annotation.*;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import ru.oorraa.backend.connectors.mqtt.eventbus.MQTTEBConfig;
+import ru.oorraa.common.eventbus.EventBusConstants;
 import ru.oorraa.common.profiles.DefaultProfile;
 
 /**
@@ -30,7 +31,7 @@ public class MQTTWorkerConfig {
 
     @DefaultProfile
     @Configuration
-    @ComponentScan({PACKAGE})
+    @ComponentScan({MQTTWorkerConfig.PACKAGE, EventBusConstants.PACKAGE})
     @PropertySource(value = "classpath:mqtt.properties")
     @PropertySource(value = "${propsFile:file:backend-local.properties}", ignoreResourceNotFound = true)
     @PropertySource(value = "${propsPath:file:}mqtt-worker-local.properties", ignoreResourceNotFound = true)
