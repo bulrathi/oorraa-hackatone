@@ -21,17 +21,20 @@ import ru.oorraa.common.model.ChatMessage;
 @Slf4j
 public class MQTTEBConfig {
 
-    public static final String CHAT_IN = "chat_in";
-    public static final String CHAT_OUT = "chat_out";
+    public static final String KAFKA_CHAT_IN = "chat_in";
+    public static final String KAFKA_CHAT_OUT = "chat_out";
+
+    public static final String MQTT_CHAT_IN = "chat/in";
+    public static final String MQTT_CHAT_OUT = "chat/out";
 
     @Autowired
     private AsyncPublisher publisher;
 
     @Bean
     public ConsumerGroupBean<ChatMessage> chatInConsumer() {
-        return new ConsumerGroupBean<>(CHAT_IN, ChatMessage.class, (msg, t) -> {
+        return new ConsumerGroupBean<>(KAFKA_CHAT_IN, ChatMessage.class, (msg, t) -> {
             try {
-                publisher.getClient().publish(new PublishMessage(CHAT_IN, QoS.AT_MOST_ONCE, JsonUtil.toJson(msg)));
+                publisher.getClient().publish(new PublishMessage(MQTT_CHAT_IN, QoS.AT_MOST_ONCE, JsonUtil.toJson(msg)));
             } catch (JsonMapperException e) {
                 ExcHandler.ex(e);
             }

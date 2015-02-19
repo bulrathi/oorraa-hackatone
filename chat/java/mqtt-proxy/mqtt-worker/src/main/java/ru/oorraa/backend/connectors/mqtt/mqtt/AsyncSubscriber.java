@@ -45,7 +45,7 @@ public class AsyncSubscriber {
             @Override
             public void publishReceived(MqttClient client, PublishMessage message) {
                 try {
-                    producer.send(MQTTEBConfig.CHAT_OUT, JsonUtil.fromJson(message.getPayloadString(), ChatMessage.class));
+                    producer.send(MQTTEBConfig.KAFKA_CHAT_OUT, JsonUtil.fromJson(message.getPayloadString(), ChatMessage.class));
                 } catch (JsonMapperException e) {
                     ExcHandler.ex(e);
                 }
@@ -105,9 +105,8 @@ public class AsyncSubscriber {
             }
 
             // Create your subscriptions. In this case we want to build up a catalog of classic rock.
-            subscriptions.add(new Subscription("chat/in", QoS.AT_MOST_ONCE));
-            subscriptions.add(new Subscription("chat/out", QoS.AT_MOST_ONCE));
-            client.subscribe(subscriptions);
+            subscriptions.add(new Subscription(MQTTEBConfig.MQTT_CHAT_OUT, QoS.AT_MOST_ONCE));
+                    client.subscribe(subscriptions);
 //        } catch (Exception ex) {
 //            log.error("An unexpected exception has occurred.", ex);
 //        }
