@@ -1,0 +1,21 @@
+description = 'Event Bus'
+
+project.group = 'ru.oorraa.common'
+
+project.apply from: utilityGradleScript
+
+configurations {
+    all*.exclude module: 'slf4j-jdk14'
+    all*.exclude module: 'slf4j-log4j12'
+    all*.exclude group: 'log4j', module: 'log4j'
+    all*.exclude group: 'com.sun.jdmk', module: 'jmxtools'
+}
+
+dependencies {
+    compile libraries.utils
+    compile (libraries.kafka) {
+        exclude module: 'slf4j-log4j12'
+        exclude group: 'log4j', module: 'log4j'
+    }
+    compile project(':common:common-model')
+}

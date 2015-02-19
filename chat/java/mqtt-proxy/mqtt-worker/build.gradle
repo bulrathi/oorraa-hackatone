@@ -1,0 +1,16 @@
+description = 'MQTT proxy worker between Apache Kafka Brokers & MQTT Brokers'
+project.group = 'ru.oorraa.backend'
+
+buildscript {
+    apply from: executableGradleBuildScript
+}
+
+apply from: executableGradleScript
+
+dependencies {
+    compile libraries.utils
+    compile libraries.cassandra
+    compile libraries.mqtt
+    compile project(':common:common-model')
+    compile project(':common:common-eventbus')
+}

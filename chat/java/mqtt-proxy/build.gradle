@@ -4,12 +4,14 @@ allprojects {
         repositories {
             mavenLocal()
             mavenCentral()
+            maven { url 'http://nexus.home.oorraa.net/nexus/content/groups/public/' }
         }
     }
 
     repositories {
         mavenLocal()
         mavenCentral()
+        maven { url 'http://nexus.home.oorraa.net/nexus/content/groups/public/' }
     }
 }
 
