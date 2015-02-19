@@ -1,0 +1,16 @@
+allprojects {
+
+    buildscript {
+        repositories {
+            mavenLocal()
+            mavenCentral()
+        }
+    }
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
+apply from: "${rootProject.projectDir}/gradle/includes/root.gradle"

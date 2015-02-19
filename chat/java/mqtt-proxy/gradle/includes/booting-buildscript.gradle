@@ -1,0 +1,7 @@
+apply from: "${rootProject.projectDir}/gradle/includes/libraries.gradle"
+
+project.buildscript {
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${libVer.springBoot}")
+    }
+}

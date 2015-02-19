@@ -1,0 +1,6 @@
+rootProject.name = 'mqtt-proxy'
+
+// Commons
+include 'common:common-util'
+
+include 'mqtt-worker'

@@ -1,0 +1,2 @@
+project.apply from: "${rootProject.projectDir}/gradle/includes/libraries.gradle"
+project.apply from: "${rootProject.projectDir}/gradle/includes/java.gradle"

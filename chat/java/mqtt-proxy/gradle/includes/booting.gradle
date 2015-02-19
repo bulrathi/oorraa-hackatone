@@ -1,0 +1,33 @@
+project.apply from: "${rootProject.projectDir}/gradle/includes/libraries.gradle"
+project.apply plugin: 'spring-boot'
+//project.apply plugin: 'maven-publish'
+
+project.dependencies {
+    compile("org.springframework.boot:spring-boot-starter:${libVer.springBoot}") {
+        exclude module: "spring-boot-starter-logging"
+    }
+
+    testCompile("org.springframework.boot:spring-boot-starter-test:${libVer.springBoot}")
+}
+
+project.springBoot {
+    backupSource = false
+}
+
+project.bootRepackage {
+    withJarTask = 'jar'
+    classifier = 'full'
+}
+
+/* // Publishing full version is not required anymore
+if (!'unspecified'.equals(project.getVersion())) {
+    def jarName = "${project.libsDir}/${project.getName()}-${project.getVersion()}-full.jar"
+    publishing {
+        publications {
+            java(MavenPublication) {
+                artifact (source: jarName, classifier: 'full') builtBy(bootRepackage)
+            }
+        }
+    }
+}
+*/
