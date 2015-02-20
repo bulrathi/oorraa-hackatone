@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.oorraa.backend.connectors.mqtt.eventbus.MQTTEBConfig;
+import ru.oorraa.backend.connectors.mqtt.spam.MessageQualityType;
+import ru.oorraa.backend.connectors.mqtt.spam.StopWordsFilter;
 import ru.oorraa.common.ExcHandler;
 import ru.oorraa.common.eventbus.producer.KafkaProducer;
 import ru.oorraa.common.json.JsonMapperException;
@@ -48,10 +50,13 @@ public class SyncSubscriber {
                 try {
                     ChatMessage msg = JsonUtil.fromJson(message.getPayloadString(), ChatMessage.class);
                     log.info("publishReceived > {}", msg);
-
-
-
                     message.ack();
+
+                    MessageQualityType type = StopWordsFilter.check(msg.getText());
+                    if(MessageQualityType.BAD_WORDS.equals(type)) {
+                        msg.setText("АХТУНГ - МАТ!");
+                    }
+
                     producer.send(MQTTEBConfig.KAFKA_CHAT_IN, msg);
                 } catch (JsonMapperException e) {
                     ExcHandler.ex(e);

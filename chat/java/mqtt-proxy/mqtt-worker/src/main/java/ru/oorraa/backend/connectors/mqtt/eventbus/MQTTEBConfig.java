@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.oorraa.backend.connectors.mqtt.mqtt.SyncPublisher;
+import ru.oorraa.backend.connectors.mqtt.spam.MessageQualityType;
+import ru.oorraa.backend.connectors.mqtt.spam.StopWordsFilter;
 import ru.oorraa.common.ExcHandler;
 import ru.oorraa.common.eventbus.consumer.ConsumerGroupBean;
 import ru.oorraa.common.json.JsonMapperException;
@@ -38,7 +40,13 @@ public class MQTTEBConfig {
         return new ConsumerGroupBean<>(zookeeper, KAFKA_CHAT_OUT, ChatMessage.class, (msg, t) -> {
             try {
                 log.info("publising message to mqtt {}", msg);
-                publisher.getClient().publish(new PublishMessage(MQTT_CHAT_IN, QoS.AT_LEAST_ONCE, JsonUtil.toJson(msg)));
+
+                MessageQualityType type = StopWordsFilter.check(msg.getText());
+                if(MessageQualityType.BAD_WORDS.equals(type)) {
+                    msg.setText("АХТУНГ - МАТ!");
+                }
+
+                publisher.getClient().publish(new PublishMessage(MQTT_CHAT_IN, QoS.AT_MOST_ONCE, JsonUtil.toJson(msg)));
             } catch (JsonMapperException e) {
                 ExcHandler.ex(e);
             }
