@@ -79,7 +79,7 @@ public class SyncSubscriber {
 
             // Create your subscriptions. In this case we want to build up a catalog of classic rock.
             List<Subscription> subscriptions = new ArrayList<Subscription>();
-            subscriptions.add(new Subscription(MQTTEBConfig.MQTT_CHAT_OUT, QoS.AT_LEAST_ONCE));
+            subscriptions.add(new Subscription(MQTTEBConfig.MQTT_CHAT_OUT, QoS.AT_MOST_ONCE));
             client.subscribe(subscriptions);
         } catch (Exception ex) {
             ExcHandler.ex(ex);
