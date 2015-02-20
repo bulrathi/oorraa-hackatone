@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.sf.xenqtt.client.PublishMessage;
 import net.sf.xenqtt.message.QoS;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.oorraa.backend.connectors.mqtt.mqtt.AsyncPublisher;
@@ -27,12 +28,15 @@ public class MQTTEBConfig {
     public static final String MQTT_CHAT_IN = "chat/in";
     public static final String MQTT_CHAT_OUT = "chat/out";
 
+    @Value("${ru.oorraa.common.eventbus.zookeeper}")
+    private String zookeeper;
+
     @Autowired
     private AsyncPublisher publisher;
 
     @Bean
     public ConsumerGroupBean<ChatMessage> chatInConsumer() {
-        return new ConsumerGroupBean<>(KAFKA_CHAT_IN, ChatMessage.class, (msg, t) -> {
+        return new ConsumerGroupBean<>(zookeeper, KAFKA_CHAT_IN, ChatMessage.class, (msg, t) -> {
             try {
                 publisher.getClient().publish(new PublishMessage(MQTT_CHAT_IN, QoS.AT_MOST_ONCE, JsonUtil.toJson(msg)));
             } catch (JsonMapperException e) {

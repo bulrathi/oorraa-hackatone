@@ -4,6 +4,7 @@ import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.oorraa.common.eventbus.MessageEncoder;
 import ru.oorraa.common.model.ChatMessage;
@@ -19,6 +20,10 @@ import java.util.Properties;
 @Service
 public class KafkaMessageProducer implements KafkaProducer {
 
+    @Value("${ru.oorraa.common.eventbus.producer.brokerList}")
+    private String brokerList;
+    @Value("${ru.oorraa.common.eventbus.zookeeper}")
+    private String zookeeper;
     private ProducerConfig config;
     private Producer<String, ChatMessage> producer;
 
@@ -26,8 +31,8 @@ public class KafkaMessageProducer implements KafkaProducer {
     public void init() {
 
         Properties props = new Properties();
-        props.put("metadata.broker.list", "178.62.194.22:9092"); // "broker1:9092,broker2:9092 "
-        props.put("zookeeper.connect", "178.62.194.22:2181/kafka"); // "hostname1:port1/dir"
+        props.put("metadata.broker.list", brokerList); // "broker1:9092,broker2:9092 "
+        props.put("zookeeper.connect", zookeeper); // "hostname1:port1/dir"
         props.put("serializer.class", MessageEncoder.class.getName());
         props.put("request.required.acks", "1");
         props.put("producer.type", "sync");

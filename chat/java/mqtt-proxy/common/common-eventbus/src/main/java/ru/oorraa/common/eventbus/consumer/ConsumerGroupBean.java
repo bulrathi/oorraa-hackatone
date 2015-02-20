@@ -28,10 +28,10 @@ public class ConsumerGroupBean<D> {
     private final ExecutorService pool;
     private final Class<D> dtoClass;
 
-    public ConsumerGroupBean(String route, Class<D> dtoClass, DtoConsumer<D> consumer) {
+    public ConsumerGroupBean(String zookeeper, String route, Class<D> dtoClass, DtoConsumer<D> consumer) {
 
         props = new Properties();
-        props.put("zookeeper.connect", "178.62.194.22:2181/kafka");
+        props.put("zookeeper.connect", zookeeper);
         props.put("group.id", UUID.randomUUID().toString());
         props.put("client.id", "mqtt-proxy");
         props.put("zookeeper.session.timeout.ms", "400");
