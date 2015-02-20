@@ -5,5 +5,5 @@ package ru.oorraa.backend.connectors.mqtt.spam;
  * @since 20/02/15
  */
 public enum MessageQualityType {
-    SPAM, HAM;
+    SPAM, HAM, BAD_WORDS;
 }

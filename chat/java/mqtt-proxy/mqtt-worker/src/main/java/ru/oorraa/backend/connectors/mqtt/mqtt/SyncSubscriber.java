@@ -33,7 +33,10 @@ public class SyncSubscriber {
     @Autowired
     private KafkaProducer producer;
     private MqttClientListener listener;
+//    @Autowired
+//    private MQTTListener listenerHolder;
     private SyncMqttClient client;
+
 
     @PostConstruct
     public void init() {
@@ -45,6 +48,9 @@ public class SyncSubscriber {
                 try {
                     ChatMessage msg = JsonUtil.fromJson(message.getPayloadString(), ChatMessage.class);
                     log.info("publishReceived > {}", msg);
+
+
+
                     message.ack();
                     producer.send(MQTTEBConfig.KAFKA_CHAT_IN, msg);
                 } catch (JsonMapperException e) {

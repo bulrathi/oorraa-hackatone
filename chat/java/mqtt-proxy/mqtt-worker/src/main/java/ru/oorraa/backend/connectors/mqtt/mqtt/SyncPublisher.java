@@ -23,9 +23,11 @@ public class SyncPublisher {
 
     @Value("${ru.oorraa.backend.connectors.mqtt.broker:188.166.32.82:1883}")
     private String broker;
-    private MqttClientListener listener;
     @Getter
     private MqttClient client;
+    private MqttClientListener listener;
+//    @Autowired
+//    private MQTTListener listenerHolder;
 
     @PostConstruct
     public void init() {

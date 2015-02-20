@@ -16,7 +16,7 @@ import static ru.oorraa.backend.connectors.mqtt.spam.MessageQualityType.SPAM;
 public class RedirectFollower implements Callable<MessageQualityType> {
 
     private static final int redirectsTreshHold = 3;
-    private static final String linksChecker = "http://www.google.com/safebrowsing/diagnostic?hl=ru&site=";
+//    private static final String linksChecker = "http://www.google.com/safebrowsing/diagnostic?hl=ru&site=";
 
     private final String link;
     private final RestTemplate restTemplate;
@@ -32,10 +32,7 @@ public class RedirectFollower implements Callable<MessageQualityType> {
         if(SPAM.equals(type)) {
             return type;
         }
-
-        
-
-        return null;
+        return HAM;
     }
 
     private MessageQualityType followLinksRecursively(String link, int redirectsCount) {
