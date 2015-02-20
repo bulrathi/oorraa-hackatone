@@ -9,7 +9,7 @@ apply from: executableGradleScript
 
 dependencies {
     compile libraries.utils
-    compile libraries.cassandra
+//    compile libraries.cassandra
     compile libraries.mqtt
     compile libGroups.httpclient
     compile libraries.spring_web

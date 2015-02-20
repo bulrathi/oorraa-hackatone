@@ -32,8 +32,8 @@ public class ConsumerGroupBean<D> {
 
         props = new Properties();
         props.put("zookeeper.connect", zookeeper);
-        props.put("group.id", UUID.randomUUID().toString());
-        props.put("client.id", "mqtt-proxy");
+        props.put("group.id", "mqtt_proxy_group");
+        props.put("client.id", "mqtt_proxy_client");
         props.put("zookeeper.session.timeout.ms", "400");
         props.put("zookeeper.sync.time.ms", "200");
         props.put("auto.commit.interval.ms", "1000");

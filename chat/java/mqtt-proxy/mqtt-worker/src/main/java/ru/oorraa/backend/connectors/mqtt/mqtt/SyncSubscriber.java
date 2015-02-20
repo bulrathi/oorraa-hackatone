@@ -45,11 +45,11 @@ public class SyncSubscriber {
                 try {
                     ChatMessage msg = JsonUtil.fromJson(message.getPayloadString(), ChatMessage.class);
                     log.info("publishReceived > {}", msg);
+                    message.ack();
                     producer.send(MQTTEBConfig.KAFKA_CHAT_IN, msg);
                 } catch (JsonMapperException e) {
                     ExcHandler.ex(e);
                 }
-                message.ack();
             }
 
             @Override
@@ -71,7 +71,7 @@ public class SyncSubscriber {
         client = new SyncMqttClient("tcp://" + broker, listener, 5);
         try {
             // Connect to the broker with a specific client ID. Only if the broker accepted the connection shall we proceed.
-            ConnectReturnCode returnCode = client.connect("musicLover", true);
+            ConnectReturnCode returnCode = client.connect("mqttSyncSubscriber", true);
             if (returnCode != ConnectReturnCode.ACCEPTED) {
                 log.error("Unable to connect to the MQTT broker. Reason: " + returnCode);
                 return;
@@ -79,9 +79,8 @@ public class SyncSubscriber {
 
             // Create your subscriptions. In this case we want to build up a catalog of classic rock.
             List<Subscription> subscriptions = new ArrayList<Subscription>();
-            subscriptions.add(new Subscription(MQTTEBConfig.MQTT_CHAT_OUT, QoS.AT_MOST_ONCE));
+            subscriptions.add(new Subscription(MQTTEBConfig.MQTT_CHAT_OUT, QoS.AT_LEAST_ONCE));
             client.subscribe(subscriptions);
-
         } catch (Exception ex) {
             ExcHandler.ex(ex);
         }

@@ -10,6 +10,7 @@ import ru.oorraa.common.eventbus.MessageEncoder;
 import ru.oorraa.common.model.ChatMessage;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.Properties;
 
 /**
@@ -36,7 +37,7 @@ public class KafkaMessageProducer implements KafkaProducer {
         props.put("serializer.class", MessageEncoder.class.getName());
         props.put("request.required.acks", "1");
         props.put("producer.type", "sync");
-        props.put("client.id", "mqtt-proxy");
+        props.put("client.id", "mqtt_proxy_client");
 
         log.trace("kafka producer config: {}", props);
 
@@ -49,6 +50,12 @@ public class KafkaMessageProducer implements KafkaProducer {
         log.info("Send message: [{}] ts: {}, {}, ", topic, System.currentTimeMillis(), message);
         KeyedMessage<String, ChatMessage> msg = new KeyedMessage<>(topic, (ChatMessage) message);
         producer.send(msg);
+    }
+
+    @PreDestroy
+    public void destroy() throws Exception {
+        log.info("closing kafka producer: clientId={}, brokers={}", config.clientId(), config.brokerList());
+        producer.close();
     }
 
 }

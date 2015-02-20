@@ -53,7 +53,7 @@ public class SyncPublisher {
 
         // Build your client. This client is a synchronous one so all interaction with the broker will block until said interaction completes.
         client = new SyncMqttClient("tcp://" + broker, listener, 5);
-        ConnectReturnCode returnCode = client.connect("mqttProducer", false);
+        ConnectReturnCode returnCode = client.connect("mqttSyncPublisher", true);
         if (returnCode != ConnectReturnCode.ACCEPTED) {
             log.error("Unable to connect to the broker. Reason: " + returnCode);
             return;
