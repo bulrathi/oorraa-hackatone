@@ -1,17 +1,21 @@
 package ru.oorraa.backend.connectors.mqtt.eventbus;
 
 import lombok.extern.slf4j.Slf4j;
+import net.sf.xenqtt.client.MqttClientListener;
 import net.sf.xenqtt.client.PublishMessage;
 import net.sf.xenqtt.message.QoS;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import ru.oorraa.backend.connectors.mqtt.mqtt.MQTTListener;
 import ru.oorraa.backend.connectors.mqtt.mqtt.SyncPublisher;
+import ru.oorraa.backend.connectors.mqtt.mqtt.SyncSubscriber;
 import ru.oorraa.backend.connectors.mqtt.spam.MessageQualityType;
 import ru.oorraa.backend.connectors.mqtt.spam.StopWordsFilter;
 import ru.oorraa.common.ExcHandler;
 import ru.oorraa.common.eventbus.consumer.ConsumerGroupBean;
+import ru.oorraa.common.eventbus.producer.KafkaProducer;
 import ru.oorraa.common.json.JsonMapperException;
 import ru.oorraa.common.json.JsonUtil;
 import ru.oorraa.common.model.ChatMessage;
@@ -32,8 +36,28 @@ public class MQTTEBConfig {
 
     @Value("${ru.oorraa.common.eventbus.zookeeper}")
     private String zookeeper;
+    @Value("${ru.oorraa.backend.connectors.mqtt.broker:188.166.32.82:1883}")
+    private String mqttBroker;
     @Autowired
     private SyncPublisher publisher;
+
+    @Bean
+    @Autowired
+    public MqttClientListener mqqtListener(KafkaProducer producer) {
+        return new MQTTListener(producer).getListener();
+    }
+
+    @Bean
+    @Autowired
+    public SyncSubscriber mqttSubscriber(KafkaProducer producer) {
+        return new SyncSubscriber(mqttBroker, mqqtListener(producer), producer);
+    }
+
+    @Bean
+    @Autowired
+    public SyncPublisher mqttPublisher(KafkaProducer producer) {
+        return new SyncPublisher(mqttBroker, mqqtListener(producer));
+    }
 
     @Bean
     public ConsumerGroupBean<ChatMessage> chatInConsumer() {

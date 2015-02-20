@@ -1,22 +1,14 @@
 package ru.oorraa.backend.connectors.mqtt.mqtt;
 
 import lombok.extern.slf4j.Slf4j;
-import net.sf.xenqtt.client.*;
+import net.sf.xenqtt.client.MqttClientListener;
+import net.sf.xenqtt.client.Subscription;
+import net.sf.xenqtt.client.SyncMqttClient;
 import net.sf.xenqtt.message.ConnectReturnCode;
 import net.sf.xenqtt.message.QoS;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 import ru.oorraa.backend.connectors.mqtt.eventbus.MQTTEBConfig;
-import ru.oorraa.backend.connectors.mqtt.spam.MessageQualityType;
-import ru.oorraa.backend.connectors.mqtt.spam.StopWordsFilter;
-import ru.oorraa.common.ExcHandler;
 import ru.oorraa.common.eventbus.producer.KafkaProducer;
-import ru.oorraa.common.json.JsonMapperException;
-import ru.oorraa.common.json.JsonUtil;
-import ru.oorraa.common.model.ChatMessage;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,60 +17,49 @@ import java.util.List;
  * @author s.meshkov <a href="mailto:s.meshkov@oorraa.net"/>
  * @since 20/02/15
  */
-@Service
 @Slf4j
 public class SyncSubscriber {
 
-    final List<Subscription> subscriptions = new ArrayList<>();
-    @Value("${ru.oorraa.backend.connectors.mqtt.broker:188.166.32.82:1883}")
-    private String broker;
-    @Autowired
-    private KafkaProducer producer;
-    private MqttClientListener listener;
-//    @Autowired
-//    private MQTTListener listenerHolder;
-    private SyncMqttClient client;
+    private final List<Subscription> subscriptions = new ArrayList<>();
+    private final SyncMqttClient client;
 
 
-    @PostConstruct
-    public void init() {
-
-        listener = new MqttClientListener() {
-
-            @Override
-            public void publishReceived(MqttClient client, PublishMessage message) {
-                try {
-                    ChatMessage msg = JsonUtil.fromJson(message.getPayloadString(), ChatMessage.class);
-                    log.info("publishReceived > {}", msg);
-                    message.ack();
-
-                    MessageQualityType type = StopWordsFilter.check(msg.getText());
-                    if(MessageQualityType.BAD_WORDS.equals(type)) {
-                        msg.setText("АХТУНГ - МАТ!");
-                    } else if(MessageQualityType.SPAM.equals(type)) {
-                        msg.setText("АХТУНГ - СПАМ!");
-                    }
-
-                    producer.send(MQTTEBConfig.KAFKA_CHAT_IN, msg);
-                } catch (JsonMapperException e) {
-                    ExcHandler.ex(e);
-                }
-            }
-
-            @Override
-            public void disconnected(MqttClient client, Throwable cause, boolean reconnecting) {
-                if (cause != null) {
-                    log.error("Disconnected from the broker due to an exception.", cause);
-                } else {
-                    log.info("Disconnecting from the broker.");
-                }
-
-                if (reconnecting) {
-                    log.info("Attempting to reconnect to the broker.");
-                }
-            }
-
-        };
+    public SyncSubscriber(String broker, MqttClientListener listener, KafkaProducer producer) {
+//        listener = new MqttClientListener() {
+//
+//            @Override
+//            public void publishReceived(MqttClient client, PublishMessage message) {
+//                try {
+//                    ChatMessage msg = JsonUtil.fromJson(message.getPayloadString(), ChatMessage.class);
+//                    log.info("publishReceived > {}", msg);
+//                    message.ack();
+//
+//                    MessageQualityType type = StopWordsFilter.check(msg.getText());
+//                    if(MessageQualityType.BAD_WORDS.equals(type)) {
+//                        msg.setText("АХТУНГ - МАТ!");
+//                    } else if(MessageQualityType.SPAM.equals(type)) {
+//                        msg.setText("АХТУНГ - СПАМ!");
+//                    }
+//
+//                    producer.send(MQTTEBConfig.KAFKA_CHAT_IN, msg);
+//                } catch (JsonMapperException e) {
+//                    ExcHandler.ex(e);
+//                }
+//            }
+//
+//            @Override
+//            public void disconnected(MqttClient client, Throwable cause, boolean reconnecting) {
+//                if (cause != null) {
+//                    log.error("Disconnected from the broker due to an exception.", cause);
+//                } else {
+//                    log.info("Disconnecting from the broker.");
+//                }
+//                if (reconnecting) {
+//                    log.info("Attempting to reconnect to the broker.");
+//                }
+//            }
+//
+//        };
 
         // Build your client. This client is a synchronous one so all interaction with the broker will block until said interaction completes.
         client = new SyncMqttClient("tcp://" + broker, listener, 5);
@@ -95,9 +76,8 @@ public class SyncSubscriber {
             subscriptions.add(new Subscription(MQTTEBConfig.MQTT_CHAT_OUT, QoS.AT_MOST_ONCE));
             client.subscribe(subscriptions);
         } catch (Exception ex) {
-            ExcHandler.ex(ex);
+            throw new IllegalStateException(ex);
         }
-
     }
 
 

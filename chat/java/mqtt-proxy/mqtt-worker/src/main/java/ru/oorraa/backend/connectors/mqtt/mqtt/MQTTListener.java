@@ -1,11 +1,11 @@
 package ru.oorraa.backend.connectors.mqtt.mqtt;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.xenqtt.client.MqttClient;
 import net.sf.xenqtt.client.MqttClientListener;
 import net.sf.xenqtt.client.PublishMessage;
-import org.springframework.beans.factory.annotation.Autowired;
 import ru.oorraa.backend.connectors.mqtt.eventbus.MQTTEBConfig;
 import ru.oorraa.backend.connectors.mqtt.spam.MessageQualityType;
 import ru.oorraa.backend.connectors.mqtt.spam.StopWordsFilter;
@@ -15,25 +15,18 @@ import ru.oorraa.common.json.JsonMapperException;
 import ru.oorraa.common.json.JsonUtil;
 import ru.oorraa.common.model.ChatMessage;
 
-import javax.annotation.PostConstruct;
-
 /**
  * @author s.meshkov <a href="mailto:s.meshkov@oorraa.net"/>
  * @since 20/02/15
  */
-//@Service
 @Slf4j
 public class MQTTListener {
 
     @Getter
-    private MqttClientListener listener;
-    @Autowired
-    private KafkaProducer producer;
+    private final MqttClientListener listener;
 
-    @PostConstruct
-    public void init() {
+    public MQTTListener(@NonNull KafkaProducer producer) {
         listener = new MqttClientListener() {
-
             @Override
             public void publishReceived(MqttClient client, PublishMessage message) {
                 try {
@@ -43,7 +36,9 @@ public class MQTTListener {
 
                     MessageQualityType type = StopWordsFilter.check(msg.getText());
                     if(MessageQualityType.BAD_WORDS.equals(type)) {
-                        msg.setText("В сообщении замечен МАТ");
+                        msg.setText("АХТУНГ - МАТ!");
+                    } else if(MessageQualityType.SPAM.equals(type)) {
+                        msg.setText("АХТУНГ - СПАМ!");
                     }
 
                     producer.send(MQTTEBConfig.KAFKA_CHAT_IN, msg);
