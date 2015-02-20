@@ -11,6 +11,8 @@ dependencies {
     compile libraries.utils
     compile libraries.cassandra
     compile libraries.mqtt
+    compile libGroups.httpclient
+    compile libraries.spring_web
     compile project(':common:common-model')
     compile project(':common:common-eventbus')
 }

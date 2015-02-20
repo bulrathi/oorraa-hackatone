@@ -7,6 +7,7 @@ import net.sf.xenqtt.client.MqttClientListener;
 import net.sf.xenqtt.client.PublishMessage;
 import net.sf.xenqtt.client.SyncMqttClient;
 import net.sf.xenqtt.message.ConnectReturnCode;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -20,6 +21,8 @@ import javax.annotation.PreDestroy;
 @Slf4j
 public class SyncPublisher {
 
+    @Value("${ru.oorraa.backend.connectors.mqtt.broker:188.166.32.82:1883}")
+    private String broker;
     private MqttClientListener listener;
     @Getter
     private MqttClient client;
@@ -49,7 +52,7 @@ public class SyncPublisher {
         };
 
         // Build your client. This client is a synchronous one so all interaction with the broker will block until said interaction completes.
-        client = new SyncMqttClient("tcp://188.166.32.82:1883", listener, 5);
+        client = new SyncMqttClient("tcp://" + broker, listener, 5);
         ConnectReturnCode returnCode = client.connect("mqttProducer", false);
         if (returnCode != ConnectReturnCode.ACCEPTED) {
             log.error("Unable to connect to the broker. Reason: " + returnCode);

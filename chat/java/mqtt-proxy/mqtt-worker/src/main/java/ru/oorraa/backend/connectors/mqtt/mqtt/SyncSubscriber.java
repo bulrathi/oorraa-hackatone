@@ -5,6 +5,7 @@ import net.sf.xenqtt.client.*;
 import net.sf.xenqtt.message.ConnectReturnCode;
 import net.sf.xenqtt.message.QoS;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.oorraa.backend.connectors.mqtt.eventbus.MQTTEBConfig;
 import ru.oorraa.common.ExcHandler;
@@ -27,6 +28,8 @@ import java.util.List;
 public class SyncSubscriber {
 
     final List<Subscription> subscriptions = new ArrayList<>();
+    @Value("${ru.oorraa.backend.connectors.mqtt.broker:188.166.32.82:1883}")
+    private String broker;
     @Autowired
     private KafkaProducer producer;
     private MqttClientListener listener;
@@ -63,7 +66,7 @@ public class SyncSubscriber {
         };
 
         // Build your client. This client is a synchronous one so all interaction with the broker will block until said interaction completes.
-        client = new SyncMqttClient("tcp://188.166.32.82:1883", listener, 5);
+        client = new SyncMqttClient("tcp://" + broker, listener, 5);
         try {
             // Connect to the broker with a specific client ID. Only if the broker accepted the connection shall we proceed.
             ConnectReturnCode returnCode = client.connect("musicLover", true);
@@ -78,7 +81,7 @@ public class SyncSubscriber {
             client.subscribe(subscriptions);
 
         } catch (Exception ex) {
-            log.error("An unexpected exception has occurred.", ex);
+            ExcHandler.ex(ex);
         }
 
     }

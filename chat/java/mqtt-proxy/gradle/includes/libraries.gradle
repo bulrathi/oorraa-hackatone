@@ -26,6 +26,7 @@ project.ext.libVer = [
         aspectj           : '1.8.4',
         kafka             : "0.8.2.0",
         scala             : "2.10",
+        httpclient        : '4.3.2',
 
         // OORRAA libraries
         utils             : '1.2.3',
@@ -48,6 +49,10 @@ project.ext.libraries = [
         commons_io            : "commons-io:commons-io:${libVer.commonsIo}",
         commons_codec         : "commons-codec:commons-codec:${libVer.commonsCodec}",
         lombok                : "org.projectlombok:lombok:${libVer.lombok}",
+
+        // HTTP
+        httpclient: "org.apache.httpcomponents:httpclient:${libVer.httpclient}",
+        httpcore  : "org.apache.httpcomponents:httpcore:${libVer.httpclient}",
 
         // Aspects
         aspectj               : "org.aspectj:aspectjweaver:${libVer.aspectj}",
