@@ -6,6 +6,9 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.concurrent.Callable;
 
+import static ru.oorraa.backend.connectors.mqtt.spam.MessageQualityType.HAM;
+import static ru.oorraa.backend.connectors.mqtt.spam.MessageQualityType.SPAM;
+
 /**
  * @author s.meshkov <a href="mailto:s.meshkov@oorraa.net"/>
  * @since 20/02/15
@@ -21,38 +24,32 @@ public class RedirectFollower implements Callable<MessageQualityType> {
     }
 
     @Override
-    public ru.oorraa.backend.connectors.mqtt.spam.MessageQualityType call() throws Exception {
-        ResponseEntity<String> responseEntity = restTemplate.getForEntity(link, String.class);
-        HttpStatus status = responseEntity.getStatusCode();
-        if(status.is2xxSuccessful()) {
-            return ru.oorraa.backend.connectors.mqtt.spam.MessageQualityType.HAM;
-        } else {
-
-        }
-        return null;
-    }
-
-    private ru.oorraa.backend.connectors.mqtt.spam.MessageQualityType followLinksRecursively(String link) {
-        ResponseEntity<String> responseEntity = restTemplate.getForEntity(link, String.class);
-        HttpStatus status = responseEntity.getStatusCode();
-        if(status.is2xxSuccessful()) {
-            return ru.oorraa.backend.connectors.mqtt.spam.MessageQualityType.HAM;
-        } else {
-
-        }
-        return null;
-    }
-
-//    @Override
-//    public MessageQualityType call() throws Exception {
+    public MessageQualityType call() throws Exception {
 //        ResponseEntity<String> responseEntity = restTemplate.getForEntity(link, String.class);
 //        HttpStatus status = responseEntity.getStatusCode();
-//        if(status)
-//        return null;
-//    }
+//        if(status.is2xxSuccessful()) {
+//            return MessageQualityType.HAM;
+//        } else {
+//
+//        }
+        MessageQualityType type = followLinksRecursively(link);
+        if(SPAM.equals(type)) {
+            return type;
+        }
 
-    public static enum MessageQualityType {
-        SPAM, HAM;
+        return null;
+    }
+
+    private MessageQualityType followLinksRecursively(String link) {
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity(link, String.class);
+        HttpStatus status = responseEntity.getStatusCode();
+        if(status.is2xxSuccessful()) {
+            return HAM;
+        } else if (status.is3xxRedirection() && responseEntity.getHeaders().getLocation() != null) {
+            return followLinksRecursively(responseEntity.getHeaders().getLocation().toString());
+        } else {
+            return SPAM;
+        }
     }
 
 }

@@ -37,6 +37,7 @@ public class MQTTEBConfig {
     public ConsumerGroupBean<ChatMessage> chatInConsumer() {
         return new ConsumerGroupBean<>(zookeeper, KAFKA_CHAT_OUT, ChatMessage.class, (msg, t) -> {
             try {
+                log.info("publising message to mqtt {}", msg);
                 publisher.getClient().publish(new PublishMessage(MQTT_CHAT_IN, QoS.AT_MOST_ONCE, JsonUtil.toJson(msg)));
             } catch (JsonMapperException e) {
                 ExcHandler.ex(e);

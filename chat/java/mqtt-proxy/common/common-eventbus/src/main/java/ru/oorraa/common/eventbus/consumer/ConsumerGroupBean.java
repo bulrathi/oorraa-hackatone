@@ -41,7 +41,7 @@ public class ConsumerGroupBean<D> {
         log.trace("kafka consumer config: {}", props);
 
         this.route = route;
-        this.numThreads = ConcurrencyUtil.numThreads();
+        this.numThreads = 1;//ConcurrencyUtil.numThreads();
         this.consumer = consumer;
         this.connector = Consumer.createJavaConsumerConnector(new ConsumerConfig(props));
         this.pool = Executors.newFixedThreadPool(numThreads);
