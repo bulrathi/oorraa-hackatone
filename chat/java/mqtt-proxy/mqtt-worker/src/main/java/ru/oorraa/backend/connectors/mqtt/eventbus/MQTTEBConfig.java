@@ -72,7 +72,7 @@ public class MQTTEBConfig {
                     msg.setText("АХТУНГ - СПАМ!");
                 }
 
-                publisher.getClient().publish(new PublishMessage(MQTT_CHAT_IN, QoS.AT_MOST_ONCE, JsonUtil.toJson(msg)));
+                publisher.getClient().publish(new PublishMessage(MQTT_CHAT_IN, QoS.AT_LEAST_ONCE, JsonUtil.toJson(msg)));
             } catch (JsonMapperException e) {
                 ExcHandler.ex(e);
             }
