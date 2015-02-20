@@ -46,7 +46,7 @@ public class KafkaMessageProducer implements KafkaProducer {
 
     @Override
     public <T> void send(String topic, T message) {
-        log.trace("Send message: [{}] ts: {}, {}, ", topic, System.currentTimeMillis(), message);
+        log.info("Send message: [{}] ts: {}, {}, ", topic, System.currentTimeMillis(), message);
         KeyedMessage<String, ChatMessage> msg = new KeyedMessage<>(topic, (ChatMessage) message);
         producer.send(msg);
     }

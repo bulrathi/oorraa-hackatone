@@ -36,6 +36,7 @@ public class KafkaConsumer<D> implements Runnable {
             log.trace("Consumed {} bytes", bytes.length);
             try {
                 D msg = JsonUtil.fromJson(SerializeUtil.bytes2String(bytes), dtoClass);
+                log.info("Decoded msg: {}", msg);
                 consumer.consume(msg, System.currentTimeMillis());
             } catch (JsonMapperException | UnsupportedEncodingException e) {
                 ExcHandler.ex(e);

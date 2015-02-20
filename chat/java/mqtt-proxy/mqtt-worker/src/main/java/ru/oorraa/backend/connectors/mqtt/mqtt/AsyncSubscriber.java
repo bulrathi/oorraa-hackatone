@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.sf.xenqtt.client.*;
 import net.sf.xenqtt.message.ConnectReturnCode;
 import net.sf.xenqtt.message.QoS;
-import org.springframework.beans.factory.annotation.Autowired;
 import ru.oorraa.backend.connectors.mqtt.eventbus.MQTTEBConfig;
 import ru.oorraa.common.ExcHandler;
 import ru.oorraa.common.eventbus.producer.KafkaProducer;
@@ -33,7 +32,7 @@ public class AsyncSubscriber {
     final CountDownLatch connectLatch = new CountDownLatch(1);
     final AtomicReference<ConnectReturnCode> connectReturnCode = new AtomicReference<ConnectReturnCode>();
     final List<Subscription> subscriptions = new CopyOnWriteArrayList<>();
-    @Autowired
+//    @Autowired
     private KafkaProducer producer;
     private AsyncClientListener listener;
     private AsyncMqttClient client;

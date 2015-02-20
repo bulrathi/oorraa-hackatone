@@ -43,7 +43,9 @@ public class SyncSubscriber {
             @Override
             public void publishReceived(MqttClient client, PublishMessage message) {
                 try {
-                    producer.send(MQTTEBConfig.KAFKA_CHAT_IN, JsonUtil.fromJson(message.getPayloadString(), ChatMessage.class));
+                    ChatMessage msg = JsonUtil.fromJson(message.getPayloadString(), ChatMessage.class);
+                    log.info("publishReceived > {}", msg);
+                    producer.send(MQTTEBConfig.KAFKA_CHAT_IN, msg);
                 } catch (JsonMapperException e) {
                     ExcHandler.ex(e);
                 }
