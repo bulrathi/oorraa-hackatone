@@ -19,36 +19,7 @@ import java.util.Set;
 public class StopWordsFilter {
 
     public static final Set<String> BAD_WORDS = ImmutableSet.of(
-            "хуй",
-            "хуйня",
-            "пидар",
-            "пидор",
-            "пидрила",
-            "жопа",
-            "пизда",
-            "гавно",
-            "ебал",
-            "ебать",
-            "сука",
-            "суки",
-            "сукин",
-            "сукины",
-            "педик",
-            "педрила",
-            "соплежую",
-            "соплежуй",
-            "сучка",
-            "опиздень",
-            "ебонтяй",
-            "охуевающий",
-            "гондопляс",
-            "опидоревший",
-            "хуекрылый",
-            "пидрастический",
-            "склипиздень",
-            "манда",
-            "разъебись",
-            "ебись"
+            "жопа"
     );
     private static final Splitter splitter = Splitter.on(" ");
     private static HttpClient httpClient = HttpClientBuilder.create().setMaxConnPerRoute(3).build();
