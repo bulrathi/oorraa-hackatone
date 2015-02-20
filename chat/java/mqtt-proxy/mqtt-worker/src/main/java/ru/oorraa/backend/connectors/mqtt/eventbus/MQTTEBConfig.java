@@ -30,13 +30,12 @@ public class MQTTEBConfig {
 
     @Value("${ru.oorraa.common.eventbus.zookeeper}")
     private String zookeeper;
-
     @Autowired
     private AsyncPublisher publisher;
 
     @Bean
     public ConsumerGroupBean<ChatMessage> chatInConsumer() {
-        return new ConsumerGroupBean<>(zookeeper, KAFKA_CHAT_IN, ChatMessage.class, (msg, t) -> {
+        return new ConsumerGroupBean<>(zookeeper, KAFKA_CHAT_OUT, ChatMessage.class, (msg, t) -> {
             try {
                 publisher.getClient().publish(new PublishMessage(MQTT_CHAT_IN, QoS.AT_MOST_ONCE, JsonUtil.toJson(msg)));
             } catch (JsonMapperException e) {

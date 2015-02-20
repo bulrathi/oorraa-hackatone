@@ -34,7 +34,7 @@ public class MQTTWorkerIT {
 
     @Test
     public void testKafka2MQTT() {
-        producer.send(MQTTEBConfig.KAFKA_CHAT_IN, createMessage());
+        producer.send(MQTTEBConfig.KAFKA_CHAT_OUT, createMessage());
     }
 
     @Test

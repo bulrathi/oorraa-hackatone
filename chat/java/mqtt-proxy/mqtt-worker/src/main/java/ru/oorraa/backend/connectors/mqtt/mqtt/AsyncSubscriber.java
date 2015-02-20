@@ -45,7 +45,7 @@ public class AsyncSubscriber {
             @Override
             public void publishReceived(MqttClient client, PublishMessage message) {
                 try {
-                    producer.send(MQTTEBConfig.KAFKA_CHAT_OUT, JsonUtil.fromJson(message.getPayloadString(), ChatMessage.class));
+                    producer.send(MQTTEBConfig.KAFKA_CHAT_IN, JsonUtil.fromJson(message.getPayloadString(), ChatMessage.class));
                 } catch (JsonMapperException e) {
                     ExcHandler.ex(e);
                 }
