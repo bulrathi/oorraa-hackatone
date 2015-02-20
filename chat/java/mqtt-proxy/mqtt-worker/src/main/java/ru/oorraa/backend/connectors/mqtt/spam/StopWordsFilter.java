@@ -3,6 +3,11 @@ package ru.oorraa.backend.connectors.mqtt.spam;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Set;
@@ -12,8 +17,6 @@ import java.util.Set;
  * @since 20/02/15
  */
 public class StopWordsFilter {
-
-    private static final Splitter splitter = Splitter.on(" ");
 
     public static final Set<String> BAD_WORDS = ImmutableSet.of(
             "хуй",
@@ -47,13 +50,27 @@ public class StopWordsFilter {
             "разъебись",
             "ебись"
     );
+    private static final Splitter splitter = Splitter.on(" ");
+    private static HttpClient httpClient = HttpClientBuilder.create().setMaxConnPerRoute(3).build();
+    private static ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+    private static RestTemplate restTemplate = new RestTemplate(requestFactory);
 
     public static MessageQualityType check(String text) {
         List<String> words = Lists.newArrayList(splitter.split(text));
-        for (String w : words) {
-            if(BAD_WORDS.contains(w.toLowerCase())) {
-                return MessageQualityType.BAD_WORDS;
+        try {
+            for (String w : words) {
+                String word = w.toLowerCase();
+                if (BAD_WORDS.contains(word)) {
+                    return MessageQualityType.BAD_WORDS;
+                }
+                if (word.contains("http://") || word.contains("https://")) {
+                    MessageQualityType type = new RedirectFollower(word, restTemplate).call();
+                    if (MessageQualityType.SPAM.equals(type)) {
+                        return type;
+                    }
+                }
             }
+        } catch (Exception e) {
         }
         return MessageQualityType.HAM;
     }

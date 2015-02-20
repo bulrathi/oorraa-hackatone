@@ -44,6 +44,8 @@ public class MQTTEBConfig {
                 MessageQualityType type = StopWordsFilter.check(msg.getText());
                 if(MessageQualityType.BAD_WORDS.equals(type)) {
                     msg.setText("АХТУНГ - МАТ!");
+                } else if(MessageQualityType.SPAM.equals(type)) {
+                    msg.setText("АХТУНГ - СПАМ!");
                 }
 
                 publisher.getClient().publish(new PublishMessage(MQTT_CHAT_IN, QoS.AT_MOST_ONCE, JsonUtil.toJson(msg)));
