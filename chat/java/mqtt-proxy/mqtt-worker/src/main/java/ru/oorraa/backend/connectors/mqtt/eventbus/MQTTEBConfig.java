@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ru.oorraa.backend.connectors.mqtt.mqtt.AsyncPublisher;
+import ru.oorraa.backend.connectors.mqtt.mqtt.SyncPublisher;
 import ru.oorraa.common.ExcHandler;
 import ru.oorraa.common.eventbus.consumer.ConsumerGroupBean;
 import ru.oorraa.common.json.JsonMapperException;
@@ -31,7 +31,7 @@ public class MQTTEBConfig {
     @Value("${ru.oorraa.common.eventbus.zookeeper}")
     private String zookeeper;
     @Autowired
-    private AsyncPublisher publisher;
+    private SyncPublisher publisher;
 
     @Bean
     public ConsumerGroupBean<ChatMessage> chatInConsumer() {

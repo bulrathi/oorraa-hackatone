@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.xenqtt.client.*;
 import net.sf.xenqtt.message.ConnectReturnCode;
-import org.springframework.stereotype.Service;
 import ru.oorraa.common.ExcHandler;
 
 import javax.annotation.PostConstruct;
@@ -16,7 +15,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author s.meshkov <a href="mailto:s.meshkov@oorraa.net"/>
  * @since 19/02/15
  */
-@Service
+@Deprecated
+//@Service
 @Slf4j
 public class AsyncPublisher {
 

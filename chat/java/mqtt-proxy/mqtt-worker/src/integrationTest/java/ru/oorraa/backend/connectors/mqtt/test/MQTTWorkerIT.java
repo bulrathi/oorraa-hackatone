@@ -10,7 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import ru.oorraa.backend.connectors.mqtt.eventbus.MQTTEBConfig;
-import ru.oorraa.backend.connectors.mqtt.mqtt.AsyncPublisher;
+import ru.oorraa.backend.connectors.mqtt.mqtt.SyncPublisher;
 import ru.oorraa.common.eventbus.producer.KafkaProducer;
 import ru.oorraa.common.json.JsonMapperException;
 import ru.oorraa.common.json.JsonUtil;
@@ -30,7 +30,7 @@ public class MQTTWorkerIT {
     @Autowired
     private KafkaProducer producer;
     @Autowired
-    private AsyncPublisher publisher;
+    private SyncPublisher publisher;
 
     @Test
     public void testKafka2MQTT() {

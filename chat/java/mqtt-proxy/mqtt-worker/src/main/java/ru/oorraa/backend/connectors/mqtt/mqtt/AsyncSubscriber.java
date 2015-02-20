@@ -5,7 +5,6 @@ import net.sf.xenqtt.client.*;
 import net.sf.xenqtt.message.ConnectReturnCode;
 import net.sf.xenqtt.message.QoS;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import ru.oorraa.backend.connectors.mqtt.eventbus.MQTTEBConfig;
 import ru.oorraa.common.ExcHandler;
 import ru.oorraa.common.eventbus.producer.KafkaProducer;
@@ -26,7 +25,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author s.meshkov <a href="mailto:s.meshkov@oorraa.net"/>
  * @since 19/02/15
  */
-@Service
+@Deprecated
+//@Service
 @Slf4j
 public class AsyncSubscriber {
 
@@ -39,7 +39,7 @@ public class AsyncSubscriber {
     private AsyncMqttClient client;
 
     @PostConstruct
-    public void init() {
+    public void init() throws InterruptedException {
         listener = new AsyncClientListener() {
 
             @Override
@@ -96,17 +96,18 @@ public class AsyncSubscriber {
         // Build your client. This client is an asynchronous one so all interaction with the broker will be non-blocking.
         client = new AsyncMqttClient("tcp://188.166.32.82:1883", listener, 5);
 //        try {
-            // Connect to the broker with a specific client ID. Only if the broker accepted the connection shall we proceed.
-            client.connect("musicLover", true);
-            ConnectReturnCode returnCode = connectReturnCode.get();
-            if (returnCode == null || returnCode != ConnectReturnCode.ACCEPTED) {
-                log.error("Unable to connect to the MQTT broker. Reason: " + returnCode);
-                return;
-            }
+        // Connect to the broker with a specific client ID. Only if the broker accepted the connection shall we proceed.
+        client.connect("musicLover", true);
+        ConnectReturnCode returnCode = connectReturnCode.get();
+//        if (returnCode == null || returnCode != ConnectReturnCode.ACCEPTED) {
+//            log.error("Unable to connect to the MQTT broker. Reason: " + returnCode);
+//            return;
+//        }
+        while (returnCode == null || returnCode != ConnectReturnCode.ACCEPTED) connectLatch.await();
 
-            // Create your subscriptions. In this case we want to build up a catalog of classic rock.
-            subscriptions.add(new Subscription(MQTTEBConfig.MQTT_CHAT_OUT, QoS.AT_MOST_ONCE));
-                    client.subscribe(subscriptions);
+        // Create your subscriptions. In this case we want to build up a catalog of classic rock.
+        subscriptions.add(new Subscription(MQTTEBConfig.MQTT_CHAT_OUT, QoS.AT_MOST_ONCE));
+        client.subscribe(subscriptions);
 //        } catch (Exception ex) {
 //            log.error("An unexpected exception has occurred.", ex);
 //        }
