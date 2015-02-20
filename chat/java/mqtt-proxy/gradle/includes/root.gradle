@@ -1,0 +1,26 @@
+project.ext {
+    utilityGradleScript = "${rootProject.projectDir}/gradle/script/utility.gradle"
+    libraryGradleScript = "${rootProject.projectDir}/gradle/script/library.gradle"
+
+    executableGradleScript = "${rootProject.projectDir}/gradle/script/executable.gradle"
+    executableGradleBuildScript = "${rootProject.projectDir}/gradle/script/executable-buildscript.gradle"
+
+    dbProjectScript = "${rootProject.projectDir}/gradle/database-project.gradle"
+//    dbProjectBuildScript = "${rootProject.projectDir}/gradle/database-project-buildscript.gradle"
+}
+
+/**
+ * Enable gradle daemon, you can use it if you want to build the project faster
+ */
+task enableDaemon << {
+    File propsFile = new File(rootDir, 'gradle.properties')
+    Properties props = new Properties()
+
+    if (propsFile.exists()) {
+        props.load(propsFile.newDataInputStream())
+    }
+
+    props.setProperty('org.gradle.daemon', Boolean.TRUE.toString());
+
+    props.store(propsFile.newWriter(), "Common settings")
+}

@@ -1,0 +1,24 @@
+project.apply plugin: 'java'
+project.apply plugin: 'maven'
+
+def javaVersion = 1.8
+
+project.sourceCompatibility = javaVersion
+project.targetCompatibility = javaVersion
+
+project.tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.incremental = true
+    options.fork = true  // Fork your compilation into a child process
+    options.forkOptions.setMemoryMaximumSize("1g") // Set maximum memory to 1g
+}
+
+project.dependencies {
+    compile libGroups.log
+    compile libGroups.utility
+    compile libGroups.spring
+
+    testCompile libGroups.tests
+}
+
+

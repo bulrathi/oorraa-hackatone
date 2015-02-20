@@ -1,0 +1,10 @@
+description = 'Model'
+
+project.group = 'ru.oorraa.common'
+
+project.apply from: utilityGradleScript
+
+dependencies {
+    compile libraries.utils
+    compile libraries.lombok
+}

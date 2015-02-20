@@ -1,0 +1,1 @@
+apply from: "${rootProject.projectDir}/gradle/includes/booting-buildscript.gradle"

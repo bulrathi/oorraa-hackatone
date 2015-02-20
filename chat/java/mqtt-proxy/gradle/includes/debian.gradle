@@ -1,0 +1,162 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+project.apply plugin: 'java'
+project.apply from: "${rootProject.projectDir}/gradle/includes/libraries.gradle"
+
+def release = project.hasProperty('release')
+def repositoryUrl = 'http://repo.oorraa.pro/' + (release ? 'testing' : 'unstable')
+
+configurations {
+    debianPkg
+}
+
+dependencies {
+    debianPkg libraries.deb_ant_task
+}
+
+def packageName = project.hasProperty("debPackageName") ? project.ext.debPackageName : "oorraa-${project.name}";
+def serviceName = project.hasProperty("debServiceName") ? project.ext.debServiceName : "${project.name}";
+def dependencies = project.hasProperty("debDependencies") ? project.ext.debDependencies : "adduser, libc6";
+def jvmArgs = project.hasProperty("debJvmArgs") ? project.ext.debJvmArgs : "";
+def maintainer = project.hasProperty("debMaintainer") ? project.ext.debMaintainer : "OORRAA Backend Team <technology@oorraa.net>"
+
+project.ext.debInfo = [
+        packageName       : packageName.toString(),
+        serviceName       : serviceName.toString(),
+        packageDescription: project.description.toString(),
+        version           : project.version.toString(),
+        jarName           : "${project.name}-${project.version}-full.jar".toString(),
+        outputPath        : "${project.buildDir}/debian/${packageName}_${project.version}_any.deb".toString(),
+        controlRoot       : "${project.buildDir}/debian/control".toString(),
+        contentRoot       : "${project.buildDir}/debian/content".toString(),
+        dependencies      : dependencies.toString(),
+        jvmArgs           : jvmArgs.toString(),
+        maintainer        : maintainer,
+]
+
+def changeLogDir = "${project.projectDir}/src/main/debian"
+def changeLogFile = "${changeLogDir}/changelog"
+def protocolVersion = project.hasProperty("protocolVersion") ? project.ext.protocolVersion : "undefined";
+def packageVersion = new String("${debInfo.version}").replace("-SNAPSHOT", "")
+
+task checkDebchange << {
+    if (!release) {
+        return
+    }
+    if(!file(changeLogFile).exists()) {
+        throw new IllegalStateException("[${project.name}]: \"${changeLogFile}\" not found!")
+    }
+    if(!file(changeLogFile).text.contains("(${packageVersion})")) {
+        throw new IllegalStateException("[${project.name}]: Changelog version doesn't match with package version (${packageVersion})!")
+    }
+    if(file(changeLogFile).text.contains('TODO')) {
+        throw new IllegalStateException("[${project.name}]: Please write change details to \"${changeLogFile}\" file!")
+    }
+    if(!file(changeLogFile).text.contains("oorraa-thrift ${protocolVersion}")) {
+        throw new IllegalStateException("[${project.name}]: Please write supported oorraa-thrift version to \"${changeLogFile}\" file!")
+    }
+}
+
+task appendDebchange(type: Exec) {
+    def text = "oorraa-thrift ${protocolVersion} | TODO"
+
+    if(file(changeLogFile).exists()) {
+        commandLine = ['dch',
+                       '--check-dirname-level', '0',
+                       '--package', debInfo.packageName,
+                       '-v', packageVersion,
+                       '-c', changeLogFile, text]
+    } else {
+        commandLine = ['dch',
+                       '--check-dirname-level', '0',
+                       '--package', debInfo.packageName,
+                       '-v', packageVersion,
+                       '-c', changeLogFile, '--create', text]
+    }
+
+    doFirst {
+        if(!file(changeLogDir).exists()) {
+            def dir = new File(changeLogDir);
+            dir.mkdirs();
+        }
+    }
+}
+
+task releaseDebchange(type: Exec, dependsOn: checkDebchange) {
+    commandLine = ['dch',
+                   '--check-dirname-level', '0',
+                   '-c', changeLogFile,
+                   '--distribution', 'unstable',
+                   '-r', '""']
+}
+
+task prepareDebContent(dependsOn: bootRepackage) {
+    def debInfo = project.ext.debInfo
+
+    inputs.dir project.libsDir
+    inputs.dir "${rootProject.projectDir}/gradle/template/debian/"
+    inputs.dir changeLogDir
+    outputs.dir debInfo.controlRoot
+    outputs.dir debInfo.contentRoot
+} << {
+    copy {
+        from ("${rootProject.projectDir}/gradle/template/debian/initd.sh")
+        filter(ReplaceTokens, tokens: debInfo)
+        into "${debInfo.contentRoot}/etc/init.d/"
+
+        rename "initd.sh", "${debInfo.serviceName}"
+    }
+
+    copy {
+        from (changeLogFile)
+        into debInfo.controlRoot
+    }
+
+    copy {
+        from ("${rootProject.projectDir}/gradle/template/debian/control")
+        filter(ReplaceTokens, tokens: debInfo)
+        into debInfo.controlRoot
+    }
+
+    copy {
+        from "${project.libsDir}"
+        include "${debInfo.jarName}"
+        into "${debInfo.contentRoot}/usr/lib/oorraa/${debInfo.serviceName}/jars"
+    }
+}
+
+task buildDeb(dependsOn: prepareDebContent) {
+    inputs.dir debInfo.controlRoot
+    inputs.dir debInfo.contentRoot
+    outputs.dir debInfo.outputPath
+} << {
+    ant.taskdef(name: 'deb', classname: 'org.vafer.jdeb.ant.DebAntTask', classpath: configurations.debianPkg.asPath)
+
+    ant.deb(destfile: debInfo.outputPath, control: debInfo.controlRoot) {
+        ant.fileset(dir: "${debInfo.contentRoot}") {
+            include(name: "**/*")
+        }
+    }
+}
+
+task publishDeb(type: Exec, dependsOn: [buildDeb, checkDebchange]) {
+    commandLine = ['curl', '-s', '--upload-file', project.ext.debInfo.outputPath, repositoryUrl]
+    doFirst {
+        if (!release) {
+            logger.warn("Publishing into snapshot repository")
+        }
+        if(release && file("${debInfo.controlRoot}/changelog").text.contains("UNRELEASED;")) {
+            throw new IllegalStateException("Changelog contains entry with \"UNRELEASED\" distribution!")
+        }
+    }
+}
+
+task installDeb(type: Exec, dependsOn: buildDeb) {
+    commandLine = ['sudo', 'dpkg', '-i', project.debInfo.outputPath]
+}
+
+task restartService(type: Exec) {
+    commandLine = ['sudo', 'service', project.debInfo.serviceName, 'restart']
+}
+
+task rebuildAndRestartService(dependsOn: [clean, installDeb, restartService])
