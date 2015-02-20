@@ -1,6 +1,8 @@
 package ru.oorraa.common.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 /**
@@ -9,9 +11,11 @@ import lombok.experimental.Accessors;
  */
 @Accessors(chain = true)
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ChatMessage {
 
-    private final String author;
-    private final String text;
+    private String author;
+    private String text;
 
 }
