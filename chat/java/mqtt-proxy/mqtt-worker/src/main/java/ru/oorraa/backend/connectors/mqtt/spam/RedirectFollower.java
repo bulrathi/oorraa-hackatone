@@ -15,6 +15,8 @@ import static ru.oorraa.backend.connectors.mqtt.spam.MessageQualityType.SPAM;
  */
 public class RedirectFollower implements Callable<MessageQualityType> {
 
+    private static final int redirectsTreshHold = 3;
+
     private final String link;
     private final RestTemplate restTemplate;
 
@@ -25,28 +27,23 @@ public class RedirectFollower implements Callable<MessageQualityType> {
 
     @Override
     public MessageQualityType call() throws Exception {
-//        ResponseEntity<String> responseEntity = restTemplate.getForEntity(link, String.class);
-//        HttpStatus status = responseEntity.getStatusCode();
-//        if(status.is2xxSuccessful()) {
-//            return MessageQualityType.HAM;
-//        } else {
-//
-//        }
-        MessageQualityType type = followLinksRecursively(link);
+        MessageQualityType type = followLinksRecursively(link, 0);
         if(SPAM.equals(type)) {
             return type;
         }
 
+        
+
         return null;
     }
 
-    private MessageQualityType followLinksRecursively(String link) {
+    private MessageQualityType followLinksRecursively(String link, int redirectsCount) {
         ResponseEntity<String> responseEntity = restTemplate.getForEntity(link, String.class);
         HttpStatus status = responseEntity.getStatusCode();
         if(status.is2xxSuccessful()) {
             return HAM;
-        } else if (status.is3xxRedirection() && responseEntity.getHeaders().getLocation() != null) {
-            return followLinksRecursively(responseEntity.getHeaders().getLocation().toString());
+        } else if (redirectsCount < redirectsTreshHold && status.is3xxRedirection() && responseEntity.getHeaders().getLocation() != null) {
+            return followLinksRecursively(responseEntity.getHeaders().getLocation().toString(), ++redirectsCount);
         } else {
             return SPAM;
         }
